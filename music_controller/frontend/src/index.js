@@ -8,5 +8,5 @@ const container = document.getElementById('app');
 // Verify the container is not null to avoid errors
 if (container !== null) {
     const root = createRoot(container); // Create a root.
-    root.render(<App name="hello" />); // Render the App component with props
+    root.render(<App />); // Render the App component with props
 }
