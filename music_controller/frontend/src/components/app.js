@@ -1,14 +1,15 @@
 import React, { Component } from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 
 export default class App extends Component{
     constructor(props){
         super(props);
     }
     render(){
-        return <h1>Testing React Code</h1>;
+        return <h1>{this.props.name}</h1>;
     }
 }
 
 const appDiv = document.getElementById('app');
-render(<App />, appDiv);
+const root = createRoot(appDiv); // Create a root.
+render(<App name="z" />);

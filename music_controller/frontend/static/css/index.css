@@ -1,0 +1,27 @@
+/*apply style to entire html body*/
+html, body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* apply styles to main div (refer to index.html) */
+#main{
+    /* what this means: position fixed = no scroll bar
+    main div renders at top left corner of screen and width and height 
+    take over the entire screen. */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+/* apply styles to app div (refer to index.html) */
+/*main div wraps around app div, and app div is where react code is actually rendered*/
+
+#app{
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
