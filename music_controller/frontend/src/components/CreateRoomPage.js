@@ -1,8 +1,84 @@
 import React, { Component } from "react";
+// Update import paths to use the new MUI version 5 package
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormControl from "@mui/material/FormControl";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { Link } from "react-router-dom";
 
-export default class CreateRoomPage extends Component{
-    
-    render(){
-        return <p>create room</p>;
-    }
+export default class CreateRoomPage extends Component {
+  defaultVotes = 2;
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      guestCanPause: true,
+      votesToSkip: this.defaultVotes,
+    };
+
+    this.handleRoomButtonPressed = this.handleRoomButtonPressed.bind(this);
+    this.handleVotesChange = this.handleVotesChange.bind(this);
+    this.handleGuestCanPauseChange = this.handleGuestCanPauseChange.bind(this);
+  }
+
+  handleVotesChange(e) {
+    this.setState({
+      votesToSkip: e.target.value,
+    });
+  }
+
+  handleGuestCanPauseChange(e) {
+    this.setState({
+      guestCanPause: e.target.value === "true" ? true : false,
+    });
+  }
+
+  handleRoomButtonPressed() {
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        votes_to_skip: this.state.votesToSkip,
+        guest_can_pause: this.state.guestCanPause,
+      }),
+    };
+    fetch("/api/create-room", requestOptions)
+      .then((response) => response.json())
+      .then((data) => console.log(data));
+  }
+
+  render() {
+    return (
+      <Grid container spacing={2}> {/* Updated spacing value to match MUI v5 */}
+        <Grid item xs={12} align="center">
+          <Typography component="h4" variant="h4">
+            Create A Room
+          </Typography>
+        </Grid>
+        <Grid item xs={12} align="center">
+
+          <FormControl component="fieldset">
+            <FormHelperText>
+                <div align="center">
+                    Guest Control of Playback State
+                </div>
+            </FormHelperText>
+            <RadioGroup row defaultValue="true">
+                <FormControlLabel 
+                  value="true" 
+                  control={<Radio color = "primary"/>}
+                />
+
+               
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+      </Grid>
+    );
+  }
 }
