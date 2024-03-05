@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 // Update import paths to use the new MUI version 5 package
+import { useNavigate } from 'react-router-dom'; // Make sure this import is included
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -11,7 +12,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Link } from "react-router-dom";
 
-export default class CreateRoomPage extends Component {
+class CreateRoomPageComponent extends Component {
   defaultVotes = 2;
 
   constructor(props) {
@@ -49,7 +50,7 @@ export default class CreateRoomPage extends Component {
     };
     fetch("/api/create-room", requestOptions)
       .then((response) => response.json())
-      .then((data) => console.log(data));
+      .then((data) => this.props.navigate("/room/" + data.code));
   }
 
   render() {
@@ -136,3 +137,13 @@ export default class CreateRoomPage extends Component {
     );
   }
 }
+  // Wrapper function that uses the useNavigate hook
+function CreateRoomPage(props) {
+  const navigate = useNavigate();
+
+  return <CreateRoomPageComponent {...props} navigate={navigate} />;
+}
+
+export default CreateRoomPage;
+
+
