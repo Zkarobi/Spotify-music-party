@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('room', views.RoomView.as_view(), name='room_view'),
     path('create-room', views.CreateRoomView.as_view(), name='create_room_view'),
-    path('get-room', views.GetRoom.as_view(), name='get_room')
+    path('get-room', views.GetRoom.as_view(), name='get_room'),
+    path('join-room', views.JoinRoom.as_view(), name='join_room_view')
 ]
 

@@ -5,10 +5,11 @@ import HomePage from "./HomePage";
 export default class App extends Component{
     
     render(){
-        return (<div>
-        <HomePage />
+        return (
+        <div className="center">
+            <HomePage />
         </div>  
-        )
+        );
 
     }
 }
