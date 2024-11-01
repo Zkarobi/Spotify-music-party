@@ -12,6 +12,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Link } from "react-router-dom";
 
+
 class CreateRoomPageComponent extends Component {
   defaultVotes = 2;
 
@@ -25,6 +26,7 @@ class CreateRoomPageComponent extends Component {
     this.handleRoomButtonPressed = this.handleRoomButtonPressed.bind(this);
     this.handleVotesChange = this.handleVotesChange.bind(this);
     this.handleGuestCanPauseChange = this.handleGuestCanPauseChange.bind(this);
+    this.handleBackButtonPressed = this.handleBackButtonPressed.bind(this);
   }
 
   handleVotesChange(e) {
@@ -40,23 +42,37 @@ class CreateRoomPageComponent extends Component {
   }
 
   handleRoomButtonPressed() {
+    event.preventDefault();  // Ensure the form does not refresh the page
+
+    console.log("Create Room button clicked");
     const requestOptions = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+     },
       body: JSON.stringify({
         votes_to_skip: this.state.votesToSkip,
         guest_can_pause: this.state.guestCanPause,
       }),
     };
+
     fetch("/api/create-room", requestOptions)
       .then((response) => response.json())
+
       .then((data) => this.props.navigate("/room/" + data.code));
   }
 
-  render() {
-    return (
-      <Grid container spacing={2}> {/* Updated spacing value to match MUI v5 */}
+  handleBackButtonPressed(event) {
+    event.preventDefault();
+    console.log("Back button clicked");
+    this.props.navigate("/"); // Navigate to homepage
+  }
 
+  render() {
+    console.log("CreateRoomPageComponent is rendering"); // Check if the component is rendering
+
+    return (
+      <Grid container spacing={2}>
         <Grid item xs={12} align="center">
           <Typography component="h4" variant="h4">
             Create A Room
@@ -64,79 +80,81 @@ class CreateRoomPageComponent extends Component {
         </Grid>
 
         <Grid item xs={12} align="center">
-
           <FormControl component="fieldset">
             <FormHelperText>
-                <div align="center">
-                    Guest Control of Playback State
-                </div>
+              <Typography variant="body2" align="center">
+                Guest Control of Playback State
+              </Typography>
             </FormHelperText>
-            <RadioGroup 
-                row 
-                defaultValue="true" 
-                onChange={this.handleGuestCanPauseChange}
+            <RadioGroup
+              row
+              defaultValue="true"
+              onChange={this.handleGuestCanPauseChange}
             >
-                <FormControlLabel 
-                  value="true" 
-                  control={<Radio color = "primary"/>}
-                  label = "Play/Pause"
-                  labelPlacement="bottom"
-                />
-                <FormControlLabel 
-                  value="false" 
-                  control={<Radio color = "secondary"/>}
-                  label = "No Control"
-                  labelPlacement="bottom"
-                />
+              <FormControlLabel
+                value="true"
+                control={<Radio color="primary" />}
+                label="Play/Pause"
+                labelPlacement="bottom"
+              />
+              <FormControlLabel
+                value="false"
+                control={<Radio color="secondary" />}
+                label="No Control"
+                labelPlacement="bottom"
+              />
             </RadioGroup>
           </FormControl>
         </Grid>
 
         <Grid item xs={12} align="center">
-            <FormControl>
-                <TextField
-                    required={true}
-                    type="number"
-                    onChange={this.handleVotesChange}
-                    defaultValue={this.defaultVotes}
-                    inputProps={{
-                        min:1,
-                        style: {textAlign: "center"}
-                    }}
-                />
-                <FormHelperText>
-                    <div align="center">
-                        Votes required to skip song
-                    </div>
-                </FormHelperText>
-            </FormControl>
+          <FormControl>
+            <TextField
+              required
+              type="number"
+              onChange={this.handleVotesChange}
+              defaultValue={this.defaultVotes}
+              inputProps={{
+                min: 1,
+                style: { textAlign: "center" },
+              }}
+            />
+            <FormHelperText>
+              <Typography variant="body2" align="center">
+                Votes required to skip song
+              </Typography>
+            </FormHelperText>
+          </FormControl>
         </Grid>
 
         <Grid item xs={12} align="center">
+          <form onSubmit={this.handleRoomButtonPressed}>
             <Button
-                color="primary"
-                variant="contained"
-                onClick={this.handleRoomButtonPressed}
+              color="primary"
+              variant="contained"
+              type="submit" // Ensure it triggers form submission explicitly
             >
-                Create A Room
+              Create A Room
             </Button>
-        </Grid>
-        <Grid item xs={12} align="center">
-            <Button
-                color="secondary"
-                variant="contained"
-                to="/"
-                component={Link}
-                onClick={this.handleRoomButtonPressed}
-            >
-                Back
-            </Button>
+          </form>
         </Grid>
 
+        <Grid item xs={12} align="center">
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={this.handleBackButtonPressed}
+            type="button"
+          >
+            Back
+          </Button>
+        </Grid>
       </Grid>
     );
   }
 }
+
+
   // Wrapper function that uses the useNavigate hook
 function CreateRoomPage(props) {
   const navigate = useNavigate();

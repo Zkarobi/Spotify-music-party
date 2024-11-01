@@ -4,6 +4,7 @@ from .serializers import RoomSerializer, CreateRoomSerializer
 from .models import Room, generate_unique_code
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import JsonResponse
 
 # Create your views here.
 class RoomView(generics.ListAPIView):
@@ -40,39 +41,45 @@ class JoinRoom(APIView):
             return Response ({'Bad Request':'Invalid Room Code'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'Bad Request':'Invalid post data, did not find a code key'}, status=status.HTTP_400_BAD_REQUEST)
-
 class CreateRoomView(APIView):
     serializer_class = CreateRoomSerializer
 
     def post(self, request, format=None):
-        #the room code is randomly generated, so is created_at, and guests_can_pause and votes_to_skip is set by the host?
-        #But, how do we identify the host?
+        # Ensure a session is active
+        if not request.session.exists(request.session.session_key):
+            request.session.create()
 
-        #checking if the current user has an active session with our web server
-        #if it doesn't, we will have to create that session
-        if not self.request.session.exists(self.request.session.session_key):
-            self.request.session.create()
-        
+        # Remove any existing room_code to avoid reuse
+        if 'room_code' in request.session:
+            del request.session['room_code']
+
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             guest_can_pause = serializer.data.get('guest_can_pause')
             votes_to_skip = serializer.data.get('votes_to_skip')
-            host = self.request.session.session_key
+            host = request.session.session_key
 
-            #check if there are any rooms in our database with same host that is trying to create a new room (indicated by session_key)
-            queryset = Room.objects.filter(host=host)
-            #if a another room exists with the same host, just grab the active room and update settings rather than creating a new room for the same session_key/host
-            if queryset.exists(): #if room settings need to be updated
-                room = queryset[0]
-                room.guest_can_pause = guest_can_pause
-                room.votes_to_skip=votes_to_skip
-                room.save(update_fields=['guest_can_pause', 'votes_to_skip'])
-                self.request.session['room_code']=room.code
-                return Response(RoomSerializer(room).data, status=status.HTTP_200_OK)
-            else: #else, create a new room for new host/session key
-                room_code = generate_unique_code()
-                room = Room(host=host, guest_can_pause=guest_can_pause, votes_to_skip=votes_to_skip, code=room_code)
-                room.save()
-                self.request.session['room_code']=room.code
-                return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+            # Always create a new room with a unique room code
+            room_code = generate_unique_code()
+            room = Room(host=host, guest_can_pause=guest_can_pause, votes_to_skip=votes_to_skip, code=room_code)
+            room.save()
+
+            # Set the new room code in the session
+            request.session['room_code'] = room.code
+            print("New room created with code:", room.code)  # Debug log
+
+            return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+        
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserInRoom(APIView):
+    def get(self, request, format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
+        
+        room_code = self.request.session.get('room_code')
+        print("Session room code:", room_code)  # Debug print
+        data = {
+            'code': room_code
+        }
+        return JsonResponse(data, status=status.HTTP_200_OK)
